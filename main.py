@@ -3,6 +3,7 @@ import asyncio
 import yaml
 import logging
 import random
+import time
 from skland_api import SklandAPI
 from notifier import NotifierManager
 
@@ -60,40 +61,50 @@ async def run_sign_in():
     
     logger.info(f"开始执行签到任务，共 {len(users)} 个账号")
     
-    # ================== 【提前获取设备指纹 (防风控献祭)】 ==================
-    # 重试次数与间隔均可通过 config.yaml 配置，用于应对偶发的森空岛风控 (如 code 1901)
-    did_retry_count = config.get("DID_RETRY_COUNT", 5)
+    # ================== 【提前获取设备指纹 (防风控)】 ==================
+    # 重试次数与间隔均可通过 config.yaml 配置，用于应对偶发的森空岛风控 (如 code 1901)，采用严格时间上限避免 CI/CD 超时
+    did_retry_count = config.get("DID_RETRY_COUNT", 3)
     try:
         did_retry_count = int(did_retry_count)
     except (ValueError, TypeError):
-        did_retry_count = 5
-    did_retry_count = max(1, min(10, did_retry_count))
+        did_retry_count = 3
+    did_retry_count = max(1, min(5, did_retry_count))  # 硬上限限制为 5 次
 
-    did_retry_interval = config.get("DID_RETRY_INTERVAL_SECS", 60)
+    did_retry_interval = config.get("DID_RETRY_INTERVAL_SECS", 20)
     try:
         did_retry_interval = int(did_retry_interval)
     except (ValueError, TypeError):
-        did_retry_interval = 60
-    did_retry_interval = max(5, min(600, did_retry_interval))
+        did_retry_interval = 20
+    did_retry_interval = max(5, min(120, did_retry_interval))  # 硬上限限制为 120 秒
 
     logger.info("正在初始化设备指纹...")
     did_success = False
+    
+    # 限制设备指纹总重试最大时间为 180 秒，防止配置叠加后任务挂死
+    max_total_wait_secs = 180
+    start_time = time.monotonic()
+
     for attempt in range(1, did_retry_count + 1):
         try:
             # 提前调用获取设备 ID，如果成功，会被 api 实例缓存在 self._did 中
             await api.get_device_id()
-            did_success = True
+            did_success = True  # 核心修复：更新状态标记，防止误判致命错误
             logger.info("设备指纹初始化成功！")
             break
         except Exception as e:
             logger.warning(f"获取设备指纹失败 (尝试 {attempt}/{did_retry_count}): {e}")
+            elapsed_time = time.monotonic() - start_time
             if attempt < did_retry_count:
+                # 检查剩余时间预算是否充足
+                if elapsed_time + did_retry_interval > max_total_wait_secs:
+                    logger.warning("设备指纹重试总耗时已触碰时间上限，放弃后续重试。")
+                    break
                 logger.info(f"将等待 {did_retry_interval} 秒后重试...")
-                await asyncio.sleep(did_retry_interval)  # 等待较长时间再重试，避开风控窗口
+                await asyncio.sleep(did_retry_interval)
 
     # 如果重试了多次依然失败，直接终止程序，不执行后续签到
     if not did_success:
-        error_msg = f"❌ 致命错误: 连续 {did_retry_count} 次无法获取设备指纹 (可能触发风控)，本次签到任务已全部取消。"
+        error_msg = f"❌ 致命错误: 连续获取设备指纹失败 (可能触发风控)，本次签到任务已全部取消。"
         logger.error(error_msg)
         notify_lines.append(error_msg)
         
