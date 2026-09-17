@@ -9,6 +9,9 @@
 * 或 Docker 环境
 > 如没有NAS或服务器环境，可以使用`GitHub Actions`签到，但海外网络存在触发森空岛风控的风险（目前未发现），另外使用 GitHub Actions 运行签到脚本存在违反 GitHub ToS 的风险，请谨慎使用并自行承担后果。
 
+## 关于风控
+部分用户反馈遇到`'code': 1903`报错，[数美官方文档](https://help.ishumei.com/docs/correction/openness/#34-%E9%A3%8E%E9%99%A9%E7%B1%BB%E5%9E%8B)未给出具体风控原因，推测和海外IP有关。目前加入了`随机睡眠延迟`和`设备指纹获取重试`来避免该问题，如调节上述两项参数仍遭遇风控问题，请尝试国内IP环境运行该脚本。
+
 ## 配置指南
 
 在使用前，请将目录下的 `config.example.yaml` 文件另存为 `config.yaml` 进行配置。
