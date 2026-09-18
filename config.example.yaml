@@ -134,6 +134,15 @@ notify:
     # 自定义 API 代理地址 (可选配置)
     base_url: "https://api.telegram.org"
 
+  # ---------- 钉钉群机器人 ----------
+  dingtalk:
+    # 钉钉群自定义机器人的完整 Webhook 地址
+    # 例如: https://oapi.dingtalk.com/robot/send?access_token=xxxxxxxx
+    webhook_url: ""
+    # 安全设置选择“加签”时生成的 SEC 开头密钥。
+    # 留空则不执行加签，可用于关键词/IP白名单安全模式。
+    secret: ""
+
   # ---------- 自定义 Webhook ----------
   custom_webhook:
     # Webhook 完整触发地址
@@ -175,9 +184,10 @@ notify:
     #   message: "{{message}}"
 
     # ===================================================
-    # 【配置示例 3：通过 POST 调用钉钉群机器人 (依赖自定义关键词)】
+    # 【配置示例 3：通过 POST 调用钉钉群机器人（不使用加签，仅关键词模式）】
     # ===================================================
-    # 关键词设置提示：必须在钉钉群机器人的安全设置中，添加自定义关键词 "森空岛"。    
+    # 如需使用 SEC 加签，请优先使用上方 dingtalk 配置。
+    # 关键词模式需在钉钉群机器人的安全设置中添加自定义关键词 "森空岛"。
     # url: "https://oapi.dingtalk.com/robot/send?access_token=31bbfxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx2c10"
     # method: "POST"
     # headers:
@@ -185,4 +195,4 @@ notify:
     # body_template:
     #   msgtype: "text"
     #   text:
-    #     content: "{{message}}"
+    #     content: "森空岛\n{{message}}"

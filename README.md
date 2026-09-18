@@ -20,7 +20,6 @@
 # 拉取代码
 git clone https://github.com/kafuneri/Skland-Sign-In.git && cd Skland-Sign-In
 cp config.example.yaml config.yaml
-
 ```
 
 ### 1. 填写用户信息
@@ -46,7 +45,25 @@ cp config.example.yaml config.yaml
 * **Server 酱 (Turbo版/Server酱³ )**：通过微信/手机客户端推送。
 * **Bark**：通过 Bark App 推送到 iOS 设备，支持官方服务和自建 Bark Server。
 * **Telegram Bot**：通过 **Telegram** 机器人发送通知。
-* **自定义 Webhook**：支持 **GET** 与 **POST** 请求，便于自由接入目前未支持的通知渠道（如钉钉、飞书或其他自建服务）。
+* **钉钉群机器人**：支持自定义群机器人 Webhook，支持加签密钥。
+* **自定义 Webhook**：支持 **GET** 与 **POST** 请求，便于自由接入飞书或其他自建服务。
+
+#### 钉钉群机器人加签配置
+
+在钉钉群自定义机器人安全设置中启用“加签”后，将 Webhook 和 `SEC...` 密钥填入：
+
+```yaml
+notify:
+  dingtalk:
+    webhook_url: "https://oapi.dingtalk.com/robot/send?access_token=xxxxxxxx"
+    secret: "SECxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+```
+
+程序会在每次发送通知时动态生成毫秒时间戳和 HMAC-SHA256 签名，并自动附加到请求 URL。  
+如果 `secret` 留空，则不会执行加签，可配合钉钉的自定义关键词或 IP 白名单安全模式使用。
+
+> 请勿将真实的森空岛 Token、钉钉 Webhook access_token 或 `SEC...` 加签密钥提交到公开仓库。
+
 ---
 
 ## 部署方法
@@ -61,7 +78,6 @@ cp config.example.yaml config.yaml
 
 ```bash
 docker compose up -d
-
 ```
 
 #### 使用 Docker Run
@@ -72,9 +88,7 @@ docker run -d \
   -v $(pwd)/config.yaml:/app/config.yaml:ro \
   -e TZ=Asia/Shanghai \
   kafuneri/skland-sign-in:latest
-
 ```
-
 
 ### 方案二：GitHub Actions 自动运行
 
@@ -87,28 +101,23 @@ docker run -d \
 
 > 注意：GitHub Actions 的 Cron 表达式使用 UTC 时间。默认工作流配置 `0 17 * * *` 对应北京时间次日 01:00。如需修改时间，请编辑 `.github/workflows/sign-in.yml` 中的 `schedule.cron`。
 
-
- 
 ### 方案三：源码运行
 
 1. 克隆本项目后安装依赖：
 ```bash
 pip install -r requirements.txt
-
 ```
-
 
 2. 执行签到脚本：
 ```bash
 python3 main.py
-
 ```
+
 脚本运行后会依次检查每个配置账号的签到状态：
 
 * 若未签到，则执行签到并获取奖励内容。
 * 若已签到，则跳过。
-* 运行结束后会输出简报，如果配置了相关通知渠道（如 Qmsg、Bark、邮件等），则会发送对应的推送通知。
-
+* 运行结束后会输出简报，如果配置了相关通知渠道（如 Qmsg、Bark、邮件、钉钉等），则会发送对应的推送通知。
 
 ---
 
