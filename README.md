@@ -38,31 +38,17 @@ cp config.example.yaml config.yaml
 本项目支持多种推送渠道，请在 `config.yaml` 的 `notify` 节点下配置：
 
 * **Qmsg 酱**：通过 QQ 发送通知。
-* **OneBot V11**：支持 NapCat、go-cqhttp 等协议，可推送至私聊或群聊。
+* **OneBot V11**：支持 SnowLuma、NapCat、go-cqhttp 等，可推送至私聊或群聊。
 * **电子邮件 (SMTP)**：支持 QQ、网易等主流邮箱推送。
 * **企业微信**：通过群机器人 Webhook 推送。
 * **微信服务号**：通过公众号模板消息推送。
 * **Server 酱 (Turbo版/Server酱³ )**：通过微信/手机客户端推送。
 * **Bark**：通过 Bark App 推送到 iOS 设备，支持官方服务和自建 Bark Server。
 * **Telegram Bot**：通过 **Telegram** 机器人发送通知。
-* **钉钉群机器人**：支持自定义群机器人 Webhook，支持加签密钥。
-* **自定义 Webhook**：支持 **GET** 与 **POST** 请求，便于自由接入飞书或其他自建服务。
+* **钉钉群机器人**：通过钉钉自定义群机器人 Webhook推送，支持加签密钥。
+* **自定义 Webhook**：支持 **GET** 与 **POST** 请求，便于自由接入目前未支持的通知渠道。
 
-#### 钉钉群机器人加签配置
-
-在钉钉群自定义机器人安全设置中启用“加签”后，将 Webhook 和 `SEC...` 密钥填入：
-
-```yaml
-notify:
-  dingtalk:
-    webhook_url: "https://oapi.dingtalk.com/robot/send?access_token=xxxxxxxx"
-    secret: "SECxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-```
-
-程序会在每次发送通知时动态生成毫秒时间戳和 HMAC-SHA256 签名，并自动附加到请求 URL。  
-如果 `secret` 留空，则不会执行加签，可配合钉钉的自定义关键词或 IP 白名单安全模式使用。
-
-> 请勿将真实的森空岛 Token、钉钉 Webhook access_token 或 `SEC...` 加签密钥提交到公开仓库。
+> 注意：请勿将真实的森空岛 Token、Webhook地址、加签密钥等敏感信息提交到公开仓库。
 
 ---
 
