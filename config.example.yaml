@@ -40,7 +40,7 @@ notify:
     # 自定义 API 接口地址 (可选配置)
     # base_url: "https://qmsg.zendee.cn"
 
-  # ---------- OneBot V11 标准协议 (NapCat / go-cqhttp 等) ----------
+  # ---------- OneBot V11 标准协议 (SnowLuma / NapCat / go-cqhttp 等) ----------
   # 支持同时下发私聊与群聊消息，目标 ID 均支持配置多个
   onebot:
     # OneBot HTTP 接口地址，例如: "http://127.0.0.1:3000"
@@ -134,6 +134,15 @@ notify:
     # 自定义 API 代理地址 (可选配置)
     base_url: "https://api.telegram.org"
 
+  # ---------- 钉钉群机器人 ----------
+  dingtalk:
+    # 钉钉群自定义机器人的完整 Webhook 地址
+    # 例如: https://oapi.dingtalk.com/robot/send?access_token=xxxxxxxx
+    webhook_url: ""
+    # 安全设置选择“加签”时生成的 SEC 开头密钥。
+    # 留空则不执行加签，可配合钉钉的自定义关键词或 IP 白名单安全模式使用。
+    secret: ""
+
   # ---------- 自定义 Webhook ----------
   custom_webhook:
     # Webhook 完整触发地址
@@ -175,9 +184,10 @@ notify:
     #   message: "{{message}}"
 
     # ===================================================
-    # 【配置示例 3：通过 POST 调用钉钉群机器人 (依赖自定义关键词)】
+    # 【配置示例 3：通过 POST 调用钉钉群机器人（非加签，依赖自定义关键词）】
     # ===================================================
-    # 关键词设置提示：必须在钉钉群机器人的安全设置中，添加自定义关键词 "森空岛"。    
+    # 如需使用 SEC 加签，请使用上方 dingtalk 配置，该示例仅作为自定义Webhook配置参考。
+    # 关键词模式需在钉钉群机器人的安全设置中，添加自定义关键词 "森空岛"。
     # url: "https://oapi.dingtalk.com/robot/send?access_token=31bbfxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx2c10"
     # method: "POST"
     # headers:
